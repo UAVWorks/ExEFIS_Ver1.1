@@ -1,16 +1,19 @@
 #include "hsc_pressure.h"
-#include <bcm2835.h>
-
+//#include <bcm2835.h>
+#include <unistd.h>
+#include <wiringPi.h>
+#include <wiringPiSPI.h>
 
 
 hsc_pressure::hsc_pressure()
 {
 	InitSPI();
+	
 }
 
 hsc_pressure::hsc_pressure(int cs)
 {
-	chipEnable = cs;
+	chipEnable = cs;	
 	InitSPI();
 }
 
@@ -20,9 +23,10 @@ hsc_pressure::~hsc_pressure()
 
 float hsc_pressure::getPressure(void)
 {
-	char vals[4];
+	char vals[4] = { 0, 0, 0, 0 };
 	char args[4] = { 0, 0, 0, 0 };
 	SPITransfer(args, vals, 4);
+	
 	/* Check the MSBs of vals[0] for normal operation - should be zero*/
 	float ret = 0.0f;
 	int tics = 0;
@@ -30,8 +34,11 @@ float hsc_pressure::getPressure(void)
 	{
 		tics = (vals[0] & 0x3F) * 256;
 		tics += vals[1];
+	//	ret = (((float)tics / (float)MAX_COUNTS) - 0.1f)*((maxPress - minPress) / 0.8f) + minPress;
+	
 		ret = ((((float)tics - MIN_OUTPUT)*(maxPress - minPress)) /
-			(MAX_OUTPUT - MIN_OUTPUT)) + minPress;
+			(MAX_OUTPUT - MIN_OUTPUT)) + minPress; 	
+		
 	}
 	return (ret);
 }
@@ -54,6 +61,7 @@ float hsc_pressure::getPressure(void)
 **************************************************************************************************/
 int hsc_pressure::InitSPI(void)
 {
+#if 0
 	if (!bcm2835_init())
 	{		
 		return 1;
@@ -65,13 +73,21 @@ int hsc_pressure::InitSPI(void)
 	}
 	bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);         // The default
 	bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);                       // The default
-	bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_512);  		// The default
+	bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_4096);    		// The default
 	bcm2835_spi_chipSelect(chipEnable);                            // The default
 	bcm2835_spi_chipSelect(chipEnable); 	
 	bcm2835_spi_setChipSelectPolarity(chipEnable, LOW);          // the default
 	
 	
 	return 0;
+#endif
+
+	if (wiringPiSPISetup(chipEnable, 500000) == -1)
+	{
+		while (1)
+			;
+	}
+	
 }
 
 
@@ -94,9 +110,16 @@ int hsc_pressure::InitSPI(void)
 **************************************************************************************************/
 void hsc_pressure::SPITransfer(char* arg, char*resp, int length)
 {		
+#if 0
 	bcm2835_spi_chipSelect(chipEnable);                             // The default
+	delay(5);
 	bcm2835_spi_setChipSelectPolarity(chipEnable, LOW);           // the default
 	bcm2835_spi_transfernb(arg, resp, length);
+#endif
+
+	int v = wiringPiSPIDataRW(chipEnable, (unsigned char*)resp, length); 	
+
+		
 }
 
 

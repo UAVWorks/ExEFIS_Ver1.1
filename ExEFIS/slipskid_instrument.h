@@ -3,6 +3,8 @@
 #include <QWidget>
 #include <QPen>
 
+#define NUM_SS_VALS  10
+
 class slipskid_instrument :public QWidget
 {
 	
@@ -16,6 +18,8 @@ protected:
 	void paintEvent(QPaintEvent *event) override;
 	
 private:
+	float vals[NUM_SS_VALS];
+	int index;
 	QPen pen;
 	QColor penColor;
 	float value; /* number of balls out */

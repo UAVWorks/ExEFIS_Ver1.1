@@ -27,5 +27,4 @@ MOC_DIR     = $$DESTDIR
 RCC_DIR     = $$DESTDIR
 UI_DIR      = $$DESTDIR
 
-LIBS	+= -lbcm2835
 LIBS	+= -lwiringPi

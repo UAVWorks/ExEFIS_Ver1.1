@@ -308,7 +308,7 @@ public:
 
 	BNO055(int sensorID, int address);
 
-	bool  begin(adafruit_bno055_opmode_t mode = OPERATION_MODE_NDOF);
+	bool  begin(bool calibrate = false, adafruit_bno055_opmode_t mode = OPERATION_MODE_NDOF, char* cdata = nullptr);
 	void  setMode(adafruit_bno055_opmode_t mode);
 	void  getSystemStatus(char *system_status, char *self_test_result, char *system_error);
 	void  getRevInfo(adafruit_bno055_rev_info_t* info);
@@ -318,7 +318,7 @@ public:
 	void  displaySystemStatus(void);
 	void  getCalibration(char* system, char* gyro, char* accel, char* mag);
 	imu::Vector<3>  getVector(adafruit_vector_type_t vector_type);
-	imu::Quaternion getQuat(void);
+	imu::Quaternion getQuat(int* error);
 	char         getTemp(void);
 
 	/* Functions to deal with raw calibration data */

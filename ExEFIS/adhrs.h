@@ -1,6 +1,7 @@
 #pragma once
 #include "BNO055.h"
 #include "hsc_pressure.h"
+#include <QByteArray>
 
 class adhrs
 {
@@ -25,5 +26,8 @@ private:
 	float euRoll;	// page 35 in BNO055 manual, these are Euler Angles in order
 	float euPitch;	// page 35 in BNO055 manual, these are Euler Angles in order
 	float slipRAW;
+	void calfile_process_line(QByteArray &line, char* data);
+	bool calfile_validate(char* data);
+	
 };
 

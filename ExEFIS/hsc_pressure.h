@@ -3,8 +3,10 @@
 #include <bcm2835.h>
 
 #define MAX_COUNTS 16383 /* 100% of full output tics*/
-#define MAX_OUTPUT 14744 /* 90% of full output tics of 16383*/
+#define MAX_OUTPUT 14745 /* 90% of full output tics of 16383*/
 #define MIN_OUTPUT 1638	/*  10% of full output tics of 16383*/
+//#define MAX_OUTPUT 16383
+//#define MIN_OUTPUT 0
 #define MAX_PRESSURE 15.0//101.325//30.5403f
 #define MIN_PRESSURE 0.0f
 

@@ -20,6 +20,9 @@
 #include <termios.h>
 #include <sys/ioctl.h>
 
+#include <QDebug>
+#include <QString>
+
 
 #define delay(x) usleep(x*1000)
 int sfd;
@@ -74,7 +77,7 @@ BNO055::BNO055(int sensorID, int address)
     @brief  Sets up the HW
 */
 /**************************************************************************/
-bool BNO055::begin(adafruit_bno055_opmode_t mode)
+bool BNO055::begin(bool calibrate, adafruit_bno055_opmode_t mode, char* cdata)
 {
 	//bcm2835_init();
 	
@@ -142,7 +145,11 @@ bool BNO055::begin(adafruit_bno055_opmode_t mode)
 	} 
 	delay(50);
 	
-	//setSensorOffsets(calData);
+	if (calibrate)
+	{
+		setSensorOffsets(cdata);
+	}
+	
 
 	/* Set to normal power mode */
 	write8(BNO055_PWR_MODE_ADDR, POWER_MODE_NORMAL);
@@ -161,9 +168,9 @@ bool BNO055::begin(adafruit_bno055_opmode_t mode)
 
 	                /* Configure axis mapping (see section 3.4) */
 	                
-					write8(BNO055_AXIS_MAP_CONFIG_ADDR, 0x18);//REMAP_CONFIG_P2); // P0-P7, Default is P1
+					write8(BNO055_AXIS_MAP_CONFIG_ADDR, 0x12); //SSK was 0x18);//REMAP_CONFIG_P2); // P0-P7, Default is P1
 	                delay(10);
-					write8(BNO055_AXIS_MAP_SIGN_ADDR, 0x04);//REMAP_SIGN_P2); // P0-P7, Default is P1
+					write8(BNO055_AXIS_MAP_SIGN_ADDR, 0x06); //SSK was 0x04);//REMAP_SIGN_P2); // P0-P7, Default is P1
 	                delay(10);
 	                
   
@@ -467,16 +474,17 @@ imu::Vector<3> BNO055::getVector(adafruit_vector_type_t vector_type)
 
 /**************************************************************************/
 
-imu::Quaternion BNO055::getQuat(void)
+imu::Quaternion BNO055::getQuat(int* error)
 {
+	*error = 0;
 	char buffer[8];
 	memset(buffer, 0, 8);
 
-	int x, y, z, w;
+	short x, y, z, w;
 	x = y = z = w = 0;
 	
 	/* Read quat data (8 bytes) */
-	readLen(BNO055_QUATERNION_DATA_W_LSB_ADDR, buffer, 8);
+	*error = readLen(BNO055_QUATERNION_DATA_W_LSB_ADDR, buffer, 8);
 	w = (((uint16_t)buffer[1]) << 8) | ((uint16_t)buffer[0]);
 	x = (((uint16_t)buffer[3]) << 8) | ((uint16_t)buffer[2]);
 	y = (((uint16_t)buffer[5]) << 8) | ((uint16_t)buffer[4]);
@@ -490,6 +498,10 @@ imu::Quaternion BNO055::getQuat(void)
 
 	const double scale = (1.0 / (1 << 14));
 	imu::Quaternion quat(scale * w, scale * x, scale * y, scale * z);
+	//qDebug() << "QuatW " << QString::number(w);
+	//qDebug() << "QuatX " << QString::number(x);
+	//qDebug() << "QuatY " << QString::number(y); 
+	//qDebug() << "QuatZ " << QString::number(z); 
 	return quat;
 }
 
@@ -956,6 +968,7 @@ int BNO055::readLen(adafruit_bno055_reg_t reg, char* buffer, char len)
 		}
 	}
 	/* ToDo: Check for error! */
+	
 
 	return error;
 

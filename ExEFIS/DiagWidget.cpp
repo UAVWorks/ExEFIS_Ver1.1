@@ -37,15 +37,15 @@ DiagWidget::DiagWidget(QWidget *parent)
 	
 	QGridLayout *mainLayout = new QGridLayout;
 	mainLayout->setColumnStretch(0, 1);
-	mainLayout->setColumnStretch(1, 1);
-	mainLayout->setColumnStretch(2, 2);
-	mainLayout->setColumnStretch(3, 1);
+	//mainLayout->setColumnStretch(1, 1);
+	//mainLayout->setColumnStretch(2, 2);
+	//mainLayout->setColumnStretch(3, 1);
 	mainLayout->addWidget(textEditadhrs, 0, 0, 3, 1, 0);
-	mainLayout->addWidget(textEditknobs, 0, 1, 3, 1, 0);
-	mainLayout->addWidget(textEditconfig, 0, 2, 3, 1, 0);
-	mainLayout->addWidget(sendButton, 0, 3, 1, 1, 0);
-	mainLayout->addWidget(readRegisterButton, 1, 3, 1, 1, 0);
-	mainLayout->addWidget(readCalibrationButton, 2, 3, 1, 1, 0);
+//	mainLayout->addWidget(textEditknobs, 0, 1, 3, 1, 0);
+	//mainLayout->addWidget(textEditconfig, 0, 2, 3, 1, 0);
+//	mainLayout->addWidget(sendButton, 0, 3, 1, 1, 0);
+//	mainLayout->addWidget(readRegisterButton, 1, 3, 1, 1, 0);
+//	mainLayout->addWidget(readCalibrationButton, 2, 3, 1, 1, 0);
 	
 	setLayout(mainLayout);
 

@@ -36,7 +36,7 @@ private:
 	QTimer *blinkTimer;
 	bool blinking = false;
 	
-	int vertical_divs = 6;
+	int vertical_divs = 4;
 	int value = 81;
 	
 

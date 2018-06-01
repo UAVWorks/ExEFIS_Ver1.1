@@ -7,8 +7,10 @@
 #include "altitude.h"
 #include <QWidget>
 #include <QGridLayout>
+#include <QDebug>
 
 int counter = 0;
+int mode = 0;
 
 panelWidget::panelWidget(QWidget *parent)
 	: QWidget(parent)
@@ -48,16 +50,20 @@ panelWidget::panelWidget(QWidget *parent)
 	mainLayout->addWidget(h1, 0, 0, 5, 3, 0);
 	
 	/* SSK - note the magic here is the 4th arg "1" that is the column span */
-	mainLayout->addWidget(vi1, 1, 0, 3, 1, 0);
-	mainLayout->addWidget(vi2, 1, 2, 3, 1, 0);
+	mainLayout->addWidget(vi1,0 , 0, 5, 1, 0);
+	mainLayout->addWidget(vi2, 0, 2, 5, 1, 0);
 	mainLayout->addWidget(r, 2, 1, 1, 1, 0);
 	mainLayout->addWidget(ss, 3, 1, 1, 1, 0);
 	mainLayout->addWidget(dg, 0, 1, 2, 1, 0);
 	mainLayout->addWidget(sw, 4, 1, 1, 1, 0);
 	
 	qtimer = new QTimer(this);
-	qtimer->setInterval(100);
+	qtimer->setInterval(50);
 	connect(qtimer, SIGNAL(timeout()), this, SLOT(onTimer()));
+	
+	qDebugTimer = new QTimer(this);
+	qDebugTimer->setInterval(5000);
+	connect(qDebugTimer, SIGNAL(timeout()), this, SLOT(onDebugTimer()));
 }
 
 
@@ -80,7 +86,7 @@ void panelWidget::onTimer(void)
 	dg->value = adhrdata[2];
 	vi1->setValue(airspeed::getAirspeedMph(adhrdata[1], 25, adhrdata[0]));
 	vi2->setValue(altitude::getAltitudeFt(adhrdata[0], vi2->setting/pow(10, vi2->settingPrec)));
-	ss->setValue(adhrdata[5]/-2.0f);
+	ss->setValue(adhrdata[5]/2.0f);
 	
 	counter++;
 	if (counter >= 5)
@@ -89,7 +95,7 @@ void panelWidget::onTimer(void)
 		counter = 0;
 		adhr->getCalibration(cal);
 		sw->status = "Sys: " + QString::number(cal[0]) + " Gyro: " + QString::number(cal[1]) + "\r" + "\n" +
-			"Accel: " + QString::number(cal[2]) + " Mag: " + QString::number(cal[3]);
+			"Accel: " + QString::number(cal[2]) + " Mag: " + QString::number(cal[3]) + " Pres: " + QString::number(adhrdata[1], 'g', 4);// " Pres: " + QString::number(adhrdata[0], 'g', 4);
 	}
 	
 	if (knob->left->getSinglePress())
@@ -99,18 +105,39 @@ void panelWidget::onTimer(void)
 	}
 	if (knob->right->getSinglePress())
 	{
-		vi2->toggleEditMode();
-		knob->right->setValue(vi2->setting);
+		mode++;
+		if (mode == 1)
+		{
+			vi2->toggleEditMode();
+			knob->right->setValue(vi2->setting);
+		}
+		if (mode == 2)
+		{
+			vi2->toggleEditMode();
+		}
+		if (mode == 3)
+		{
+			dg->toggleEditMode();
+			knob->right->setValue(dg->setting);
+		}
+		if (mode == 4)
+		{
+			dg->toggleEditMode();
+		}
+		if (mode >= 4)
+		{
+			mode = 0;	
+		}
 	}
 	
-	if (dg->editMode)dg->setSetting(knob->left->getValue());
+	if (dg->editMode)dg->setSetting(knob->right->getValue()); //NOTE FIXED FOR 3.5 Display
 	if (vi2->editMode)vi2->setSetting(knob->right->getValue());
 	
 	if (knob->right->getPress(false) > 10)
 	{
-		qtimer->stop();
-		close();
-		launchDiag(2);		
+		//qtimer->stop();
+		//close();
+		//launchDiag(2);		
 	}
 }
 
@@ -133,4 +160,65 @@ void panelWidget::setKNOBS(knobs* k)
 void panelWidget::showEvent(QShowEvent *event)
 {
 	qtimer->start();
+	qDebugTimer->start();
+}
+
+
+void panelWidget::onDebugTimer(void)
+{
+	unsigned char offsets[22];
+	char caldata[4];
+	float adhrdata[6];
+	int status = adhr->getAllSixRaw(adhrdata);
+	
+	qDebug("!!! Orientation !!!");
+	qDebug() << "Pitch " << QString::number(adhrdata[4], 'g', 4);
+	qDebug() << "Roll " << QString::number(adhrdata[3], 'g', 4);
+	qDebug() << "Heading " << QString::number(adhrdata[2], 'g', 4);
+	qDebug() << "Airspeed " << airspeed::getAirspeedMph(adhrdata[1], 25, adhrdata[0]);
+	qDebug() << "Altitude " << altitude::getAltitudeFt(adhrdata[0], vi2->setting / pow(10, vi2->settingPrec));
+	
+	if (adhr->getOffsets((char*)offsets))
+	{	
+		qDebug("^^^ Got Offsets from BNO055 ^^^");	
+		qint16 val = *(qint16*)offsets;
+		qDebug() << "Accel Offset X ," << QString::number((int)val, 10) << ","; 
+		val = *(qint16*)&offsets[2];
+		qDebug() << "Accel Offset Y ," << QString::number((int)val, 10) << ","; 
+		val = *(qint16*)&offsets[4];		
+		qDebug() << "Accel Offset Z ," << QString::number((int)val, 10) << ",";
+		val = *(qint16*)&offsets[6];	
+		qDebug() << "Gyro Offset X ," << QString::number((int)val, 10) << ",";
+		val = *(qint16*)&offsets[8];	
+		qDebug() << "Gyro Offset Y ," << QString::number((int)val, 10) << ",";
+		val = *(qint16*)&offsets[10];	
+		qDebug() << "Gyro Offset Z ," << QString::number((int)val, 10) << ",";
+		val = *(qint16*)&offsets[12];	
+		qDebug() << "Mag Offset X ," << QString::number((int)val, 10) << ",";
+		val = *(qint16*)&offsets[14];	
+		qDebug() << "Mag Offset Y ," << QString::number((int)val, 10) << ",";
+		val = *(qint16*)&offsets[16];	
+		qDebug() << "Mag Offset Z ," << QString::number((int)val, 10) << ",";
+		val = *(qint16*)&offsets[18];	
+		qDebug() << "Accel Radius ," << QString::number((int)val, 10) << ",";
+		val = *(qint16*)&offsets[20];	
+		qDebug() << "Mag Radius ," << QString::number((int)val, 10) << ",";
+		//qDebug() << "Raw Accel X LSB" << QString::number(offsets[0]);
+		//qDebug() << "Raw Accel X MSB" << QString::number(offsets[1]);
+		//qDebug() << "Raw Accel Y LSB" << QString::number(offsets[2]);
+		//qDebug() << "Raw Accel Y MSB" << QString::number(offsets[3]);
+		//qDebug() << "Raw Accel Z LSB" << QString::number(offsets[4]);
+		//qDebug() << "Raw Accel Z MSB" << QString::number(offsets[5]);
+		
+		
+	}
+	else
+	{
+		qDebug("^^^ Failed to get Offsets from BNO055 ^^^");		
+	}
+	adhr->getCalibration(caldata);
+	qDebug("/// Got Cals from BNO055 ///");
+	qDebug() << "Cal Data " << "Sys: " + QString::number(caldata[0]) + " Gyro: " + QString::number(caldata[1]) + "\r" + "\n" +
+			"Accel: " + QString::number(caldata[2]) + " Mag: " + QString::number(caldata[3]);
+	
 }

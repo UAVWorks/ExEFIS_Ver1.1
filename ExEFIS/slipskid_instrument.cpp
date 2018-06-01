@@ -11,7 +11,12 @@ slipskid_instrument::slipskid_instrument(QWidget *parent)
 	setAttribute(Qt::WA_NoSystemBackground);
 	setAttribute(Qt::WA_TransparentForMouseEvents);
 	this->penColor = Qt::white;
-	value = -1.0f;
+	value = 0.0f;
+	for (int i = 0; i < NUM_SS_VALS; i++)
+	{
+		vals[i] = 0;
+	}
+	index = 0;
 }
 
 
@@ -22,7 +27,15 @@ slipskid_instrument::~slipskid_instrument()
 
 void slipskid_instrument::setValue(float val)
 {
-	value = val;
+	vals[index] = val;
+	index++;
+	if (index >= NUM_SS_VALS) index = 0;
+	float sum = 0.0f;
+	for (int i = 0; i < NUM_SS_VALS; i++)
+	{
+		sum += vals[i];
+	}
+	value = sum/10.0f;
 	update();
 }
 
@@ -44,10 +57,10 @@ void slipskid_instrument::paintEvent(QPaintEvent *event)
 	painter.setPen(penColor);
 	painter.setBrush(Qt::white);
 	
-	painter.translate(value*wide, 0);
+	painter.translate(-value*wide, 0);
 	painter.drawEllipse(r);
 	
-	painter.translate(-value*wide, 0);
+	painter.translate(value*wide, 0);
 	painter.setPen(Qt::black);
 	painter.drawRect(lv);
 	painter.drawRect(lr);

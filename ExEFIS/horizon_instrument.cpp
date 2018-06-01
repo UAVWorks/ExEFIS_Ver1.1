@@ -32,7 +32,7 @@ void horizon_instrument::paintEvent(QPaintEvent *event)
 	
 	/*Move the Origin to the center so it will rotate*/
 	float azpix = height() / 180.0f;
-	painter.translate(width() / 2, (height() /2 )+ (azpix * _azimuth));//(height() / 2) + _azimuth));
+	painter.translate(width() / 2, (height() /2 ) + (azpix * _azimuth));//(height() / 2) + _azimuth));
 	painter.rotate(_angle);
 
 		

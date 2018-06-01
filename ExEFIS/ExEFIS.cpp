@@ -8,7 +8,6 @@
 #include <QProcess>
 #include <QWidget>
 #include <QScreen>
-#include <bcm2835.h>
 
 int main(int argc, char *argv[])
 {	
@@ -24,15 +23,23 @@ int main(int argc, char *argv[])
 	system("gpio edge 6 both");
 	system("gpio edge 16 both");
 	
-	bcm2835_init();
-
+	//system("gpio load spi");
+	
+	//bcm2835_init();
+	
+	qDebug("****************** LOG BEGINS HERE **************************");
+	qDebug("Version 1.1 - Kitfox Test");
+	
 	QApplication a(argc, argv);
+	
+	QApplication::setOverrideCursor(Qt::BlankCursor);
 
 	QScreen *screen = QGuiApplication::primaryScreen();
 	QRect  screenGeometry = screen->geometry();
 	
-	adhrs *ad = new adhrs();
 	knobs *k = new knobs();
+	adhrs *ad = new adhrs();
+	
 	
 	QStackedWidget *w = new QStackedWidget();
 	
@@ -42,15 +49,17 @@ int main(int argc, char *argv[])
 	p->showFullScreen();
 	p->update();
 	
+	p->setCursor(Qt::BlankCursor);
+	
 	
 //	SplashWidget *s = new SplashWidget(0, ad, k);
 //	s->showFullScreen();
 //	s->update();
 	
-//	DiagWidget *m = new DiagWidget();
-//	m->setADHRS(ad);
-//	m->setKnobs(k);
-	//m->show();
+	//DiagWidget *m = new DiagWidget();
+	//m->setADHRS(ad);
+	//m->setKnobs(k);
+	//m->showFullScreen();
 	
 //	w->addWidget(s);
 //	w->addWidget(p);

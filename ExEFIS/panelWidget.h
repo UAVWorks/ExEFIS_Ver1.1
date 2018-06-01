@@ -22,6 +22,7 @@ public:
 	
 public slots :
 	void onTimer(void);
+	void onDebugTimer(void);
 	
 signals:
 	void launchDiag(int index);
@@ -31,6 +32,7 @@ protected:
 	
 private:
 	QTimer *qtimer;
+	QTimer *qDebugTimer;
 	horizon_instrument *h1;
 	vertical_instrument *vi1;
 	vertical_instrument *vi2;
