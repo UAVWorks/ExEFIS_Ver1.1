@@ -1,0 +1,27 @@
+^^^ Got Offsets from BNO055 ^^^
+Accel Offset X , "24" ,
+Accel Offset Y , "1" ,
+Accel Offset Z , "-33" ,
+Gyro Offset X , "-353" ,
+Gyro Offset Y , "-224" ,
+Gyro Offset Z , "65" ,
+Mag Offset X , "3" ,
+Mag Offset Y , "0" ,
+Mag Offset Z , "-2" ,
+Accel Radius , "1000" ,
+Mag Radius , "790" ,
+
+
+Another test:
+Accel Offset X , "7" ,
+Accel Offset Y , "7" ,
+Accel Offset Z , "-30" ,
+Gyro Offset X , "-348" ,
+Gyro Offset Y , "-187" ,
+Gyro Offset Z , "57" ,
+Mag Offset X , "2" ,
+Mag Offset Y , "0" ,
+Mag Offset Z , "-1" ,
+Accel Radius , "1000" ,
+Mag Radius , "877" ,
+
